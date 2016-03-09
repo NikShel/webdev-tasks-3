@@ -1,0 +1,24 @@
+{
+  "name": "webdev-tasks-3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NikShel/webdev-tasks-3.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NikShel/webdev-tasks-3/issues"
+  },
+  "homepage": "https://github.com/NikShel/webdev-tasks-3#readme",
+  "dependencies": {
+    "jscs": "^2.11.0",
+    "mocha": "^2.4.5",
+    "sinon": "^1.17.3"
+  }
+}
