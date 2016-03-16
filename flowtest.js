@@ -42,25 +42,23 @@ describe('Flow tests', function () {
             callback.should.have.been.calledWithExactly(null, [1, 2, 3]);
         });
 
-        var callback = sinon.spy();
-        var shouldNotWork = sinon.spy();
-        var functions = [
-            function (next) {
-                next(null, null);
-            },
-            function (data, next) {
-                next('error', null);
-            },
-            shouldNotWork
-        ];
-        flow.serial(functions, callback);
-        it('should call callback with error if needed', function () {
+        it('should stop after error and call callback', function () {
+            var callback = sinon.spy();
+            var shouldNotWork = sinon.spy();
+            var functions = [
+                function (next) {
+                    next(null, null);
+                },
+                function (data, next) {
+                    next('error', null);
+                },
+                shouldNotWork
+            ];
+            flow.serial(functions, callback);
             callback.should.have.been.calledWith('error', null);
-        });
-
-        it('should stop after error', function () {
             shouldNotWork.should.have.not.been.called;
         });
+
     });
 
     describe('Parallel tests', function () {
