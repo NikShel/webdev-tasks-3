@@ -11,10 +11,12 @@ chai.use(sinonChai);
 
 describe('Flow tests', function () {
     describe('Serial tests', function () {
-        it('should work with empty empty functions list', function () {
-            var callback = sinon.spy();
+        it('should work with empty empty functions list', function (done) {
+            var callback = sinon.spy(() => {
+                callback.should.have.been.called;
+                done();
+            });
             flow.serial([], callback);
-            callback.should.have.been.called;
         });
 
         it('should run functions in series', function (done) {
@@ -75,31 +77,39 @@ describe('Flow tests', function () {
     });
 
     describe('Parallel tests', function () {
-        it('should work with empty empty functions list', function () {
-            var callback = sinon.spy();
+        it('should work with empty empty functions list', function (done) {
+            var callback = sinon.spy(() => {
+                callback.should.have.been.called;
+                done();
+            });
             flow.parallel([], callback);
-            callback.should.have.been.called;
         });
 
         it('should call callback with correct results', function (done) {
-            var functions = [
-                function (localCallback) {
+            var func1 = sinon.spy(function (localCallback) {
                     setTimeout(() => {
                         localCallback(null, 1);
                     });
-                },
-                function (localCallback) {
+                });
+            var func2 = sinon.spy(function (localCallback) {
                     setTimeout(() => {
                         localCallback(null, 2);
                     });
-                },
-                function (localCallback) {
+                });
+            var func3 = sinon.spy(function (localCallback) {
                     setTimeout(() => {
                         localCallback(null, 3);
                     });
-                }
+                });
+            var functions = [
+                func1,
+                func2,
+                func3
             ];
             var callback = sinon.spy(function (err, data) {
+                func1.should.have.been.calledOnce;
+                func2.should.have.been.calledOnce;
+                func3.should.have.been.calledOnce;
                 callback.should.have.been.calledWithExactly(null, [1, 2, 3]);
                 done();
             });
@@ -136,13 +146,14 @@ describe('Flow tests', function () {
 
     describe('Map tests', function () {
         it('should call callback with correct results', function (done) {
-            var func = function (number, localCallback) {
+            var func = sinon.spy(function (number, localCallback) {
                 setTimeout(() => {
                     localCallback(null, number + 1);
                 });
-            };
+            });
             var callback = sinon.spy(function (err, data) {
                 callback.should.have.been.calledWithExactly(null, [2, 3]);
+                func.should.have.callCount(2);
                 done();
             });
             flow.map([1, 2], func, callback);
@@ -167,10 +178,12 @@ describe('Flow tests', function () {
             flow.map([1, 2], func, callback);
         });
 
-        it('should work with empty values list', function () {
-            var callback = sinon.spy();
+        it('should work with empty values list', function (done) {
+            var callback = sinon.spy(function (err, data) {
+                callback.should.have.been.calledWithExactly(null, []);
+                done();
+            });
             flow.map([], function () {}, callback);
-            callback.should.have.been.calledWithExactly(null, []);
         });
     });
 });
