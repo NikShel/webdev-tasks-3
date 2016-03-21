@@ -1,7 +1,6 @@
 'use strict';
 
 const flow = require('./lib/flow.js');
-const assert = require('assert');
 const sinon = require('sinon');
 const chai = require('chai');
 const sinonChai = require('sinon-chai');
@@ -11,11 +10,8 @@ chai.use(sinonChai);
 
 describe('Flow tests', function () {
     describe('Serial tests', function () {
-        it('should work with empty empty functions list', function (done) {
-            var callback = sinon.spy(() => {
-                callback.should.have.been.called;
-                done();
-            });
+        it('should work with empty functions list', function (done) {
+            var callback = sinon.spy(done);
             flow.serial([], callback);
         });
 
@@ -46,6 +42,8 @@ describe('Flow tests', function () {
                 firstFunc.should.have.been.calledOnce;
                 secondFunc.should.have.been.calledOnce;
                 thirdFunc.should.have.been.calledOnce;
+                firstFunc.calledBefore(secondFunc);
+                secondFunc.calledBefore(thirdFunc);
                 callback.should.have.been.calledWithExactly(null, [1, 2, 3]);
                 done();
             });
@@ -77,11 +75,8 @@ describe('Flow tests', function () {
     });
 
     describe('Parallel tests', function () {
-        it('should work with empty empty functions list', function (done) {
-            var callback = sinon.spy(() => {
-                callback.should.have.been.called;
-                done();
-            });
+        it('should work with empty functions list', function (done) {
+            var callback = sinon.spy(done);
             flow.parallel([], callback);
         });
 
@@ -117,20 +112,21 @@ describe('Flow tests', function () {
         });
 
         it('should call callback with error if needed', function (done) {
+            var shouldStart = sinon.spy(function (localCallback) {
+                setTimeout(() => {
+                    localCallback(null, 2);
+                });
+            });
             var functions = [
                 function (localCallback) {
                     setTimeout(() => {
                         localCallback('error', 1);
                     });
                 },
-                function (localCallback) {
-                    setTimeout(() => {
-                        localCallback(null, 2);
-                    });
-                }
+                shouldStart
             ];
             var callback = sinon.spy(function (err, data) {
-                callback.should.have.been.called.Once;
+                shouldStart.should.have.been.called;
                 callback.should.have.been.calledWith('error');
                 done();
             });
